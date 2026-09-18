@@ -11,6 +11,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # The runner's shared Rustup home is outside the plugin's virtual paths.
+      - name: Use a Rustup home visible to proto and Moon
+        run: echo "RUSTUP_HOME=$HOME/.rustup" >> "$GITHUB_ENV"
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
