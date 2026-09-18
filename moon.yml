@@ -1,0 +1,39 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
+language: rust
+layer: library
+
+# Cargo owns incremental compilation. Always execute checks, and never archive
+# target/ in Moon's task cache.
+taskOptions:
+  cache: false
+
+tasks:
+  build:
+    command: cargo build --workspace --locked
+  check:
+    command: cargo check --workspace --all-targets --locked
+  format:
+    command: cargo fmt --all
+    options:
+      runInCI: false
+  format-check:
+    command: cargo fmt --all -- --check
+  lint:
+    command: cargo clippy --workspace --all-targets --locked -- -D warnings
+  test:
+    command: cargo test --workspace --locked
+  wasm-check:
+    command: cargo check --workspace --lib --locked --target wasm32-unknown-unknown
+  counter:
+    command: cargo run --locked -p netplaycraft-counter
+  verify:
+    deps:
+      - rust:format-check
+      - rust:lint
+      - rust:test
+      - rust:wasm-check
+      - rust:counter
+    options:
+      # Avoid competing Cargo processes taking the same workspace build lock.
+      runDepsInParallel: false

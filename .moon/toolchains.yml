@@ -1,0 +1,11 @@
+$schema: https://moonrepo.dev/schemas/toolchains.json
+
+# Pin the bootstrap CLI for Moon and the GitHub setup action.
+proto:
+  version: "0.62.2"
+
+# Rust version is inherited from .prototools.
+rust:
+  components: [clippy, rustfmt]
+  targets: [wasm32-unknown-unknown]
+  syncToolchainConfig: true

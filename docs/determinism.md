@@ -20,18 +20,17 @@ reconstructing tick progression even when no command changed count.
 ## Commands
 
 ```sh
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
-cargo run -p netplaycraft-counter
-rustup target add wasm32-unknown-unknown
-cargo check --workspace --lib --target wasm32-unknown-unknown
+proto use
+moon run rust:verify
 ```
 
-The workflow runs these checks on stable Rust. No external Rust crates or services
-are required. Network access is needed only to provision a Rust toolchain/target.
-The project currently follows stable rather than declaring an independently
-verified minimum supported Rust version.
+This is also the CI entry point. Individual targets are `rust:format-check`,
+`rust:lint`, `rust:test`, `rust:counter`, and `rust:wasm-check`. Their Cargo commands
+live in root `moon.yml`; [tooling.md](tooling.md) describes setup and version pins.
+Rust is pinned to a tested stable release rather than a moving `stable` channel.
+An independently verified minimum supported Rust version remains undecided.
+No external Rust crates or services are required. Network access is needed to
+provision proto/Moon and the Rust toolchain/target.
 
 ## Coverage
 
