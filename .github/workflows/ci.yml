@@ -17,4 +17,10 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
+      - name: Inspect Rust toolchain paths
+        run: |
+          command -v rustup
+          rustup toolchain list
+          rustup show home
+          rustup which --toolchain 1.95.0 cargo
       - run: moon run rust:verify
