@@ -84,7 +84,12 @@ Netcode core must not depend on WebRTC, WebTransport, Cloudflare, S3, Bevy,
 browser APIs, or Tokio without a demonstrated necessity. Runtime integration
 owns time and I/O. Authority is independent of deployment.
 
-Start with only useful crates. Candidate initial layout:
+Use a crates-first monorepo managed with proto and Moon. Proto pins tool versions;
+Moon orchestrates tasks across the repository; Cargo owns the Rust workspace and
+crate dependency graph. Reusable libraries live in crates/, reference applications
+in examples/, and future browser packages/apps join this monorepo when needed.
+
+Start with only useful crates. Initial layout:
 
 ```text
 crates/netplaycraft-core

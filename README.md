@@ -21,8 +21,9 @@ and disconnects. Four small library crates plus the counter have **zero external
 Rust dependencies**. Core and simulation contracts are `no_std`.
 
 ```sh
-cargo run -p netplaycraft-counter
-cargo test --workspace
+proto use
+moon run rust:counter
+moon run rust:test
 ```
 
 The default run uses 80 ms latency, up to 30 ms extra jitter, 3% loss, 2% duplication,
@@ -31,6 +32,13 @@ The virtual network runs without sleeping. Change conditions through the example
 `run_demo(conditions, seed)` function.
 
 ## Workspace
+
+This is a **crates-first monorepo**. Reusable Rust libraries live in `crates/`,
+reference applications in `examples/`, and architecture/roadmap material in `docs/`.
+Proto manages tool versions; Moon orchestrates workspace tasks; Cargo owns crate
+resolution and compilation. Future browser packages and applications join this
+repository when their milestones need them.
+
 
 | Package | Responsibility |
 | --- | --- |
@@ -47,6 +55,7 @@ extracting a shared strategy.
 
 ## Design and roadmap
 
+- [Monorepo tooling and contributor commands](docs/tooling.md)
 - [Mission and complete staged plan](docs/plan.md)
 - [Architecture, API, and dependency graph](docs/architecture.md)
 - [Counter wire protocol](docs/protocol.md)
@@ -65,15 +74,17 @@ future milestones. The next proof is the unchanged counter in two browser tabs.
 
 ## Development
 
-Use stable Rust. All workspace packages currently have publishing disabled.
+Install [proto](https://moonrepo.dev/docs/proto/install), then run:
 
 ```sh
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
-rustup target add wasm32-unknown-unknown
-cargo check --workspace --lib --target wasm32-unknown-unknown
+proto use
+moon run rust:verify
 ```
 
-CI performs these checks and runs the counter. No browser, service, cloud account,
-or signaling server is required for this milestone.
+`rust:verify` runs formatting checks, Clippy, all tests, WASM compilation, and the
+counter. CI uses this same task. Rust and Moon versions are pinned in `.prototools`;
+Moon installs Rust components and the WASM target. See [tooling](docs/tooling.md)
+for individual tasks and the version update workflow.
+
+All workspace packages currently have publishing disabled. No browser, service,
+cloud account, or signaling server is required for this milestone.

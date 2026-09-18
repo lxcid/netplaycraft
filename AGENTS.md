@@ -20,6 +20,11 @@ intent. Roadmap items are not authorization to expand the current milestone.
 - Prefer stable safe Rust, small composable traits, and minimal dependencies.
   Add tracing when runtime integration needs structured events; current diagnostic
   counters should stay directly testable.
-- Run cargo fmt --all -- --check, cargo clippy --workspace --all-targets -- -D warnings,
-  cargo test --workspace, and cargo check --workspace --lib --target wasm32-unknown-unknown
-  for cross-cutting Rust changes. Update protocol/architecture docs when contracts change.
+- Keep this a crates-first monorepo: reusable Rust code in crates/, reference
+  applications in examples/, documentation in docs/. Add other language projects
+  only when needed; register them in .moon/workspace.yml.
+- Proto manages tool versions, Moon orchestrates tasks, and Cargo owns the Rust
+  dependency graph. Update Rust/Moon pins in .prototools and run moon sync to
+  synchronize rust-toolchain.toml. The proto bootstrap pin is in .moon/toolchains.yml.
+- Run proto use on setup and moon run rust:verify for cross-cutting changes. This
+  is the same entry point as CI. Update protocol/architecture docs when contracts change.

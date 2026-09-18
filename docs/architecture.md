@@ -20,6 +20,14 @@ suffix. The same rules run in two independent simulation instances connected by
 encoded messages. Browser/native networking and durable backend swaps are still
 future validation, not capabilities claimed by this prototype.
 
+## Monorepo organization
+
+The repository is crates-first: `crates/` holds reusable Rust libraries and
+`examples/` holds reference applications. Proto pins tool versions and Moon runs
+workspace tasks. Cargo remains responsible for the crate graph and compilation.
+The initial Moon project is the Rust workspace; future language projects can be
+registered alongside it. See [tooling.md](tooling.md).
+
 ## Dependency graph
 
 Arrows mean “depends on.” Every dependency is local; there are no third-party
