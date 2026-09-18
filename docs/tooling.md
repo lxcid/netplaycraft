@@ -31,7 +31,11 @@ moon run rust:verify
 ```
 
 Moon provisions the configured Rust components and `wasm32-unknown-unknown` target.
-The GitHub workflow uses `moonrepo/setup-toolchain` and the same verify command.
+The GitHub workflow uses `moonrepo/setup-toolchain`, ensures the base Rust
+components exist, and runs the same verify command. If an existing or partially
+installed toolchain is missing Cargo, repair it with
+`rustup component add cargo rustc rust-std` from the repository root before running
+Moon. The version is selected by rust-toolchain.toml.
 
 | Target | Purpose |
 | --- | --- |
