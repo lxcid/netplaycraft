@@ -39,14 +39,13 @@ Proto manages tool versions; Moon orchestrates workspace tasks; Cargo owns crate
 resolution and compilation. Future browser packages and applications join this
 repository when their milestones need them.
 
-
-| Package | Responsibility |
-| --- | --- |
-| netplaycraft-core | Typed ticks, peers, players, sequences, channels, commands, checksums |
-| netplaycraft-sim | Independent Simulation, Snapshotable, Checksummed traits |
-| netplaycraft-transport | Nonblocking semantic message transport contract |
-| netplaycraft-transport-memory | Seeded network and two endpoints, explicit virtual time |
-| netplaycraft-counter | Game rules, example-local authority/replay/protocol, CLI composition |
+| Package                       | Responsibility                                                        |
+| ----------------------------- | --------------------------------------------------------------------- |
+| netplaycraft-core             | Typed ticks, peers, players, sequences, channels, commands, checksums |
+| netplaycraft-sim              | Independent Simulation, Snapshotable, Checksummed traits              |
+| netplaycraft-transport        | Nonblocking semantic message transport contract                       |
+| netplaycraft-transport-memory | Seeded network and two endpoints, explicit virtual time               |
+| netplaycraft-counter          | Game rules, example-local authority/replay/protocol, CLI composition  |
 
 The example depends on the four libraries. Simulation and transport depend on core;
 the memory adapter depends on transport and core. Portable libraries never depend
@@ -82,9 +81,10 @@ moon run rust:verify
 ```
 
 `rust:verify` runs formatting checks, Clippy, all tests, WASM compilation, and the
-counter. CI uses this same task. Rust and Moon versions are pinned in `.prototools`;
-Moon installs Rust components and the WASM target. See [tooling](docs/tooling.md)
-for individual tasks and the version update workflow.
+counter. CI uses this same task. Tool versions are pinned in `.prototools`; Moon
+installs Rust components and the WASM target, and pnpm installs oxfmt for
+Markdown, YAML, TOML, and JSON. See [tooling](docs/tooling.md) for individual
+tasks and the version update workflow.
 
 All workspace packages currently have publishing disabled. No browser, service,
 cloud account, or signaling server is required for this milestone.

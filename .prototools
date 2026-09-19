@@ -1,2 +1,6 @@
 moon = "2.5.4"
 rust = "1.95.0"
+
+# Node and pnpm exist only to install oxfmt from package.json.
+node = "24.17.0"
+pnpm = "12.4.1"

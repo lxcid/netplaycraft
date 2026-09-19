@@ -25,6 +25,6 @@ pub trait Transport {
     fn delivery(&self, channel: ChannelId) -> Option<Delivery>;
     /// Ok means accepted for sending, not delivered. Must not block.
     fn send(&mut self, peer: PeerId, channel: ChannelId, bytes: &[u8]) -> Result<(), Self::Error>;
-    /// Drain currently available events; this does not advance simulation time.
+    /// Return the next available event, if any; this does not advance simulation time.
     fn poll(&mut self) -> Result<Option<TransportEvent>, Self::Error>;
 }

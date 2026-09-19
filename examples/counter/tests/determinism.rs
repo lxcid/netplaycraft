@@ -2,23 +2,29 @@ use netplaycraft_core::{Checksum, Command, PeerId, PlayerId, Sequence, Tick};
 use netplaycraft_counter::{
     DemoError,
     game::{Action, Counter},
-    protocol::{Frame, Message},
+    protocol::Message,
     run_demo,
-    session::{Host, MAX_HISTORY, Replica, SessionError},
+    session::{Frame, Host, MAX_HISTORY, Replica, SessionError},
 };
 use netplaycraft_sim::{Checksummed, Simulation, Snapshotable};
 use netplaycraft_transport_memory::NetworkConditions;
 
 const PEERS: [PeerId; 2] = [PeerId(10), PeerId(20)];
 
+/// Seeded test-input generator; not a statistical RNG.
+fn lcg(state: &mut u64) -> u64 {
+    *state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+    *state
+}
+
 fn history(seed: u64, steps: usize) -> (Vec<Frame>, Counter) {
     let mut host = Host::new(PEERS).unwrap();
     let mut rng = seed;
     for _ in 0..steps {
-        rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1);
+        let sample = lcg(&mut rng);
         // Include empty ticks as well as both actions; every command alternates player.
-        if !rng.is_multiple_of(4) {
-            let action = if rng & 256 == 0 {
+        if !sample.is_multiple_of(4) {
+            let action = if sample & 256 == 0 {
                 Action::Increment
             } else {
                 Action::Decrement
@@ -126,6 +132,10 @@ fn checkpoint_plus_suffix_and_restore_plus_replay_match_at_every_tick() {
 
 #[test]
 fn authority_rejects_spoofing_stale_turns_and_future_acks() {
+    assert!(matches!(
+        Host::new([PEERS[0], PEERS[0]]),
+        Err(SessionError::InvalidPeers)
+    ));
     let mut host = Host::new(PEERS).unwrap();
     assert_eq!(
         host.propose(PeerId(99), Sequence(0), Action::Increment),
@@ -144,6 +154,11 @@ fn authority_rejects_spoofing_stale_turns_and_future_acks() {
     host.advance().unwrap();
     assert_eq!(
         host.propose(PEERS[1], Sequence(0), Action::Increment),
+        Err(SessionError::StaleTurn)
+    );
+    // Turn staleness is reported before the player check.
+    assert_eq!(
+        host.propose(PEERS[0], Sequence(0), Action::Increment),
         Err(SessionError::StaleTurn)
     );
     assert_eq!(
@@ -260,12 +275,7 @@ fn malformed_packet_corpus_never_panics_or_normalizes_invalid_bytes() {
     let mut rng = 1_u64;
     for len in 0..128 {
         for _ in 0..128 {
-            let bytes: Vec<u8> = (0..len)
-                .map(|_| {
-                    rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1);
-                    (rng >> 32) as u8
-                })
-                .collect();
+            let bytes: Vec<u8> = (0..len).map(|_| (lcg(&mut rng) >> 32) as u8).collect();
             if let Ok(message) = Message::decode(&bytes) {
                 assert_eq!(message.encode(), bytes);
             }

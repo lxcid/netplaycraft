@@ -28,7 +28,6 @@ pub enum NetworkError {
     Disconnected,
     PayloadTooLarge,
     Backpressure,
-    TimeOverflow,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -119,12 +118,9 @@ impl SimulatedNetwork {
         ))
     }
 
-    pub fn advance(&mut self, elapsed: Duration) -> Result<(), NetworkError> {
+    pub fn advance(&mut self, elapsed: Duration) {
         let mut state = self.0.borrow_mut();
-        state.now = state
-            .now
-            .checked_add(elapsed)
-            .ok_or(NetworkError::TimeOverflow)?;
+        state.now += elapsed;
         // Stable sorting preserves send order when delivery times tie.
         state.packets.sort_by_key(|packet| packet.due);
         let ready = state
@@ -135,7 +131,6 @@ impl SimulatedNetwork {
             state.inboxes[packet.destination].push_back(packet.event);
             state.stats.delivered += 1;
         }
-        Ok(())
     }
 
     pub fn stats(&self) -> NetworkStats {
@@ -184,14 +179,6 @@ impl Transport for MemoryTransport {
             return Err(NetworkError::Backpressure);
         }
         let conditions = state.conditions;
-        // Validate the worst-case time before changing queue state or diagnostics.
-        let max_delay = u64::from(conditions.latency_ms)
-            + u64::from(conditions.jitter_ms)
-            + u64::from(conditions.reorder_delay_ms);
-        state
-            .now
-            .checked_add(Duration::from_millis(max_delay))
-            .ok_or(NetworkError::TimeOverflow)?;
         state.stats.sent += 1;
         if state.chance(conditions.loss_bps) {
             state.stats.dropped += 1;
@@ -251,10 +238,10 @@ mod tests {
             ..Default::default()
         });
         a.send(PeerId(20), GAMEPLAY, &[1]).unwrap();
-        n.advance(Duration::from_millis(79)).unwrap();
+        n.advance(Duration::from_millis(79));
         assert!(messages(&mut b).is_empty());
         assert!(messages(&mut b).is_empty());
-        n.advance(Duration::from_millis(1)).unwrap();
+        n.advance(Duration::from_millis(1));
         assert_eq!(messages(&mut b), vec![vec![1]]);
     }
     #[test]
@@ -264,7 +251,7 @@ mod tests {
             ..Default::default()
         });
         a.send(PeerId(20), GAMEPLAY, &[1]).unwrap();
-        n.advance(Duration::from_secs(1)).unwrap();
+        n.advance(Duration::from_secs(1));
         assert!(messages(&mut b).is_empty());
         assert_eq!(n.stats().dropped, 1);
         let (mut n, mut a, mut b) = pair(NetworkConditions {
@@ -272,7 +259,7 @@ mod tests {
             ..Default::default()
         });
         a.send(PeerId(20), GAMEPLAY, &[2]).unwrap();
-        n.advance(Duration::ZERO).unwrap();
+        n.advance(Duration::ZERO);
         assert_eq!(messages(&mut b), vec![vec![2], vec![2]]);
     }
     #[test]
@@ -289,7 +276,7 @@ mod tests {
             for byte in 0..100 {
                 a.send(PeerId(20), GAMEPLAY, &[byte]).unwrap();
             }
-            n.advance(Duration::from_secs(1)).unwrap();
+            n.advance(Duration::from_secs(1));
             (messages(&mut b), n.stats())
         }
         let (packets, stats) = run();
@@ -303,7 +290,7 @@ mod tests {
         a.send(PeerId(20), GAMEPLAY, &[1]).unwrap();
         n.disconnect();
         n.disconnect();
-        n.advance(Duration::from_secs(1)).unwrap();
+        n.advance(Duration::from_secs(1));
         assert_eq!(b.poll(), Ok(Some(TransportEvent::Disconnected(PeerId(10)))));
         assert_eq!(b.poll(), Ok(None));
         assert_eq!(

@@ -9,16 +9,28 @@ taskOptions:
   cache: false
 
 tasks:
-  build:
-    command: cargo build --workspace --locked
-  check:
-    command: cargo check --workspace --all-targets --locked
   format:
     command: cargo fmt --all
+    deps:
+      - rust:oxfmt
     options:
       runInCI: false
   format-check:
     command: cargo fmt --all -- --check
+    deps:
+      - rust:oxfmt-check
+  pnpm-install:
+    command: pnpm install --frozen-lockfile
+  oxfmt:
+    command: pnpm exec oxfmt
+    deps:
+      - rust:pnpm-install
+    options:
+      runInCI: false
+  oxfmt-check:
+    command: pnpm exec oxfmt --check
+    deps:
+      - rust:pnpm-install
   lint:
     command: cargo clippy --workspace --all-targets --locked -- -D warnings
   test:

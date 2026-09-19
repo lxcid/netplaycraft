@@ -34,6 +34,9 @@ provision proto/Moon and the Rust toolchain/target.
 
 ## Coverage
 
+- Direct counter rules: Increment then Decrement across alternating players
+  returns the count to zero, empty ticks advance only the tick, and wrong ticks
+  or extra commands are rejected without changing state.
 - Virtual latency deadlines and proof that poll does not move time.
 - Actual 100% loss, actual duplication, seeded repeatability and reordering.
 - Disconnect queue cleanup and rejected post-disconnect sends.

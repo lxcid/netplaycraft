@@ -45,9 +45,10 @@ graph TD
     memory --> core
 ```
 
-Inside the example, `game` uses only core/simulation contracts; `protocol` knows
-command data; `session` implements authority and replay without I/O; `lib.rs`
-composes sessions with transport and drives virtual time. The CLI prints results.
+Inside the example, `game` uses only core/simulation contracts; `session` owns
+authoritative frames and implements authority and replay without I/O; `protocol`
+encodes those frames, proposals, and ACKs; `lib.rs` composes sessions with
+transport and drives virtual time. The CLI prints results.
 
 Future rollback, lockstep, and snapshot strategies should depend inward on these
 contracts. Browser, native, cloud, engine, and storage adapters also depend inward.
@@ -158,7 +159,7 @@ original sends. Pending traffic can remain when the demo converges.
 
 ## Persistence and runtime
 
-Snapshotable enables the recovery *operation*, not a durable store. Tests restore
+Snapshotable enables the recovery _operation_, not a durable store. Tests restore
 an in-memory checkpoint and replay frames after it, including empty ticks. The
 current frame index is its tick; accepted command turn numbers are separate.
 Future journal Sequence and checkpoint watermarks must explicitly define what
