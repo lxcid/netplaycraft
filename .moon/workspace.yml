@@ -1,0 +1,9 @@
+$schema: https://moonrepo.dev/schemas/workspace.json
+
+# Cargo owns the crate graph; Moon orchestrates this Rust workspace as one project.
+# Register other language projects here when they are introduced.
+projects:
+  rust: "."
+
+vcs:
+  defaultBranch: main

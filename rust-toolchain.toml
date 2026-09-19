@@ -1,0 +1,5 @@
+# The channel is synchronized from .prototools by Moon.
+[toolchain]
+channel = "1.95.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
