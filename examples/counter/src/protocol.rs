@@ -1,13 +1,6 @@
 //! Deliberately small, bounded example protocol, not the future library wire format.
-use crate::game::Action;
+use crate::{game::Action, session::Frame};
 use netplaycraft_core::{Checksum, Command, PlayerId, Sequence, Tick};
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Frame {
-    pub tick: Tick,
-    pub command: Option<Command<Action>>,
-    pub checksum: Checksum,
-}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Message {

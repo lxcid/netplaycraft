@@ -55,7 +55,7 @@ pub fn run_demo(conditions: NetworkConditions, seed: u64) -> Result<DemoReport, 
     const SIMULATION_STEPS: u64 = 120;
     const MAX_NETWORK_STEPS: usize = 2000;
     for step in 0..MAX_NETWORK_STEPS {
-        network.advance(Duration::from_millis(20))?;
+        network.advance(Duration::from_millis(20));
         while let Some(event) = host_io.poll()? {
             if let TransportEvent::Message {
                 peer,
@@ -67,13 +67,11 @@ pub fn run_demo(conditions: NetworkConditions, seed: u64) -> Result<DemoReport, 
                     Message::Proposal { turn, action }
                         if host.game().next_tick().0 < SIMULATION_STEPS =>
                     {
+                        // Late retries are StaleTurn; a proposal already in flight
+                        // is PendingCommand. Anything else is a real fault.
                         match host.propose(peer, turn, action) {
                             Ok(())
-                            | Err(
-                                SessionError::Unauthorized
-                                | SessionError::StaleTurn
-                                | SessionError::PendingCommand,
-                            ) => {}
+                            | Err(SessionError::StaleTurn | SessionError::PendingCommand) => {}
                             Err(error) => return Err(error.into()),
                         }
                     }

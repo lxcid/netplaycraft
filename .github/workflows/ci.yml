@@ -1,6 +1,7 @@
 name: Monorepo
 on:
   push:
+    branches: [main]
   pull_request:
 permissions:
   contents: read
@@ -10,11 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Moon diffs touched files against vcs.defaultBranch (main), which a
+          # shallow pull-request checkout does not contain.
           fetch-depth: 0
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
-      # Ensure a registered but incomplete toolchain has the compiler binaries
+      # proto's native Rust install on this runner registers the pinned
+      # toolchain without cargo/rustc/rust-std, and the toolchain cache saved
+      # by the first failed run keeps that incomplete toolchain. Complete it
       # before Moon locates Cargo. The version comes from rust-toolchain.toml.
       - name: Ensure base Rust components
         run: rustup component add cargo rustc rust-std

@@ -101,6 +101,39 @@ impl Checksummed for Counter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn state(game: &Counter) -> (i32, Tick, Sequence, PlayerId) {
+        (
+            game.count(),
+            game.next_tick(),
+            game.turn(),
+            game.next_player(),
+        )
+    }
+    #[test]
+    fn rules_alternate_players_and_empty_ticks_only_advance_time() {
+        let mut game = Counter::default();
+        game.tick(Tick(0), &[]).unwrap();
+        assert_eq!(state(&game), (0, Tick(1), Sequence(0), PlayerId(0)));
+        let command = |player: u8, payload| Command {
+            player: PlayerId(player),
+            payload,
+        };
+        game.tick(Tick(1), &[command(0, Action::Increment)])
+            .unwrap();
+        assert_eq!(state(&game), (1, Tick(2), Sequence(1), PlayerId(1)));
+        game.tick(Tick(2), &[command(1, Action::Decrement)])
+            .unwrap();
+        assert_eq!(state(&game), (0, Tick(3), Sequence(2), PlayerId(0)));
+        assert_eq!(game.tick(Tick(2), &[]), Err(GameError::WrongTick));
+        assert_eq!(
+            game.tick(
+                Tick(3),
+                &[command(0, Action::Increment), command(1, Action::Increment)]
+            ),
+            Err(GameError::TooManyCommands)
+        );
+        assert_eq!(state(&game), (0, Tick(3), Sequence(2), PlayerId(0)));
+    }
     #[test]
     fn rejected_commands_are_atomic() {
         let mut game = Counter::default();

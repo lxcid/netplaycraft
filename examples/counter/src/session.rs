@@ -1,14 +1,20 @@
 //! Example-specific host authority and ordered command replay. No transport or clock API.
-use crate::{
-    game::{Action, Counter, GameError},
-    protocol::Frame,
-};
-use netplaycraft_core::{Command, PeerId, PlayerId, Sequence, Tick};
+use crate::game::{Action, Counter, GameError};
+use netplaycraft_core::{Checksum, Command, PeerId, PlayerId, Sequence, Tick};
 use netplaycraft_sim::{Checksummed, Simulation};
 use std::collections::{BTreeMap, btree_map::Entry};
 
 /// This demo retains a short complete history. Durable storage/pruning is future work.
 pub const MAX_HISTORY: usize = 256;
+
+/// One authoritative step: its tick, the accepted command if any, and the
+/// checksum of the state after applying it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Frame {
+    pub tick: Tick,
+    pub command: Option<Command<Action>>,
+    pub checksum: Checksum,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SessionError {
@@ -61,6 +67,9 @@ impl Host {
 
     /// Bind a proposal to its actual sender. Payloads cannot claim a player ID.
     /// One proposal per turn; retries are rejected once that turn is accepted.
+    /// A stale turn is reported before the player check, so a late retry is
+    /// never Unauthorized; that error means an unknown sender or a wrong player
+    /// on the current turn.
     pub fn propose(
         &mut self,
         sender: PeerId,
@@ -72,11 +81,11 @@ impl Host {
             .iter()
             .position(|&peer| peer == sender)
             .ok_or(SessionError::Unauthorized)?;
-        if PlayerId(player as u8) != self.game.next_player() {
-            return Err(SessionError::Unauthorized);
-        }
         if turn != self.game.turn() {
             return Err(SessionError::StaleTurn);
+        }
+        if PlayerId(player as u8) != self.game.next_player() {
+            return Err(SessionError::Unauthorized);
         }
         if self.pending.is_some() {
             return Err(SessionError::PendingCommand);

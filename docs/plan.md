@@ -34,12 +34,12 @@ that cloud hosting is mandatory. Expose small composable primitives.
 
 Target configurations, without rewriting the game rules:
 
-| Game | Synchronization | Authority | Transport | Persistence | Runtime |
-| --- | --- | --- | --- | --- | --- |
-| Mahjong | Commands | Player host | WebRTC | OPFS | Browser/WASM |
-| Mahjong | Commands | Server | WebTransport | S3 checkpoints | Native Rust |
-| Fighter | Rollback | Peers | WebRTC | RAM | Browser/WASM |
-| FPS | Prediction, reconciliation, snapshots | Dedicated | WebTransport | RAM + S3 | Native Rust |
+| Game    | Synchronization                       | Authority   | Transport    | Persistence    | Runtime      |
+| ------- | ------------------------------------- | ----------- | ------------ | -------------- | ------------ |
+| Mahjong | Commands                              | Player host | WebRTC       | OPFS           | Browser/WASM |
+| Mahjong | Commands                              | Server      | WebTransport | S3 checkpoints | Native Rust  |
+| Fighter | Rollback                              | Peers       | WebRTC       | RAM            | Browser/WASM |
+| FPS     | Prediction, reconciliation, snapshots | Dedicated   | WebTransport | RAM + S3       | Native Rust  |
 
 Continuously test this broader portability target: browser host/WebRTC/OPFS,
 native host/WebRTC/RAM, dedicated server/WebTransport/S3, and edge
@@ -236,15 +236,15 @@ architectural lessons with source references, not copied APIs.
 
 ## Milestones
 
-| Stage | Deliverable and acceptance |
-| --- | --- |
-| 0 — Architecture | architecture.md, dependency direction, ADRs for major unresolved questions; only traits needed by the prototype |
-| 1 — Local deterministic session | core, sim, in-memory transport, counter; two peers in one process, fixed ticks, commands, encoded messages, latency/loss, checksums; no browser required |
-| 2 — Browser P2P | WebRTC and WASM adapters; two tabs run counter; signaling, ICE/STUN, configurable TURN, reliable/unreliable channels, connect/disconnect; replaceable signaling |
-| 3 — Rollback | input prediction, state history, rollback/resimulation, input delay, desync checksums; two moving squares under injected latency |
-| 4 — Browser persistence | OPFS SnapshotStore + JournalStore; page refresh restores checkpoint+journal and verifies deterministic reconstruction; memory reference backend first |
-| 5 — Command/lockstep | scheduling, input delay, barriers where needed, checksums/desync, replay; begin Mahjong state machine |
-| Later | WebTransport, native authority, snapshot replication/interpolation, prediction/reconciliation, lag compensation, S3/R2, Durable Objects, host migration, interest management, timeline debugger |
+| Stage                           | Deliverable and acceptance                                                                                                                                                                      |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 — Architecture                | architecture.md, dependency direction, ADRs for major unresolved questions; only traits needed by the prototype                                                                                 |
+| 1 — Local deterministic session | core, sim, in-memory transport, counter; two peers in one process, fixed ticks, commands, encoded messages, latency/loss, checksums; no browser required                                        |
+| 2 — Browser P2P                 | WebRTC and WASM adapters; two tabs run counter; signaling, ICE/STUN, configurable TURN, reliable/unreliable channels, connect/disconnect; replaceable signaling                                 |
+| 3 — Rollback                    | input prediction, state history, rollback/resimulation, input delay, desync checksums; two moving squares under injected latency                                                                |
+| 4 — Browser persistence         | OPFS SnapshotStore + JournalStore; page refresh restores checkpoint+journal and verifies deterministic reconstruction; memory reference backend first                                           |
+| 5 — Command/lockstep            | scheduling, input delay, barriers where needed, checksums/desync, replay; begin Mahjong state machine                                                                                           |
+| Later                           | WebTransport, native authority, snapshot replication/interpolation, prediction/reconciliation, lag compensation, S3/R2, Durable Objects, host migration, interest management, timeline debugger |
 
 ## First implementation checklist
 

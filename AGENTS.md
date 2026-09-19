@@ -23,8 +23,10 @@ intent. Roadmap items are not authorization to expand the current milestone.
 - Keep this a crates-first monorepo: reusable Rust code in crates/, reference
   applications in examples/, documentation in docs/. Add other language projects
   only when needed; register them in .moon/workspace.yml.
-- Proto manages tool versions, Moon orchestrates tasks, and Cargo owns the Rust
-  dependency graph. Update Rust/Moon pins in .prototools and run moon sync to
-  synchronize rust-toolchain.toml. The proto bootstrap pin is in .moon/toolchains.yml.
-- Run proto use on setup and moon run rust:verify for cross-cutting changes. This
-  is the same entry point as CI. Update protocol/architecture docs when contracts change.
+- Proto manages tool versions, Moon orchestrates tasks, Cargo owns the Rust
+  dependency graph, and pnpm owns Node dev tools such as oxfmt. Update Rust/Moon
+  pins in .prototools and run moon sync to synchronize rust-toolchain.toml. The
+  proto bootstrap pin is in .moon/toolchains.yml.
+- Run proto use on setup, moon run rust:format after editing code or docs, and
+  moon run rust:verify for cross-cutting changes. Verify is the same entry point as
+  CI. Update protocol/architecture docs when contracts change.
