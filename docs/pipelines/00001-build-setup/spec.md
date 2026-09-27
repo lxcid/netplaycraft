@@ -80,8 +80,12 @@ The README's development section gives humans the setup and verify commands. `AG
 
 There is no separate tooling guide. It would be a third copy of the same commands.
 
-### D8 — `CLAUDE.md` is a symlink to `AGENTS.md`
+### D8 — Setup adds no `CLAUDE.md`
 
-Answers open question 1: yes.
+Proposed: awaiting operator approval.
 
-Claude Code reads `CLAUDE.md`, not `AGENTS.md`. A symlink gives it the same guide, with no second copy to keep in sync. Devloop's adopt skill deliberately leaves this link to the repository.
+Answers open question 1: no. Claude Code already loads `AGENTS.md`.
+
+Since v2.1.277, Claude Code reads `AGENTS.md` when there is no `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md` in the working directory or any directory above it. A `CLAUDE.md` symlinked to `AGENTS.md` changes nothing, because Claude reads the content only once. Source: [How Claude remembers your project](https://code.claude.com/docs/en/memory#agents-md).
+
+Any of those three files replaces `AGENTS.md` rather than adding to it. If one is ever needed, it imports the guide with `@AGENTS.md`.

@@ -42,5 +42,5 @@ The outcome is true when:
 
 ## Open questions
 
-1. Does setup include making Claude Code load `AGENTS.md`? There is no `CLAUDE.md`, so Claude Code does not read the agent guide today.
+1. Does setup include making Claude Code load `AGENTS.md`?
 2. Should verify check that the rules compile for the browser target, `wasm32-unknown-unknown`?
