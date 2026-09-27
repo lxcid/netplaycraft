@@ -8,7 +8,11 @@ Binding: every later pipeline that adds a project tool. The browser P2P pipeline
 
 `.prototools` pins the versions of Moon, Rust, Node, and pnpm. `.moon/toolchains.yml` pins proto itself, for Moon and for CI. Node dev tools are pnpm dev dependencies in the root `package.json`, installed from `pnpm-lock.yaml`. `moon sync` generates `rust-toolchain.toml` from `.prototools`, so the Rust version has one source.
 
-A later pipeline is in violation if it needs a project tool installed any other way, such as `cargo install`, `npm install -g`, Homebrew, or proto's npm backend. It is also in violation if it pins a tool version outside `.prototools`, `package.json`, and the lockfiles.
+proto installs Rust through rustup, and installs rustup first when it is missing. Moon adds the Rust components and targets that `.moon/toolchains.yml` lists.
+
+proto is the bootstrap, so it cannot install itself. Its own installer installs it locally, and CI's setup action installs it in CI. Moon and that action both read proto's version from `.moon/toolchains.yml`.
+
+A later pipeline is in violation if it needs any other project tool installed another way, such as `cargo install`, `npm install -g`, Homebrew, or proto's npm backend. It is also in violation if it pins a tool version outside `.prototools`, `.moon/toolchains.yml`, `package.json`, and the lockfiles.
 
 What would overturn this: a tool a pipeline needs that neither proto nor pnpm can install at a pinned version.
 
