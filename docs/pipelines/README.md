@@ -1,4 +1,5 @@
-<!-- devloop:pipelines v1 sha:a96ff457 -->
+<!-- devloop:pipelines v1 sha:8373e189 -->
+
 # Pipelines
 
 A pipeline is one unit of work, from the problem that motivated it to the code that closed it. Everything about that work lives in one directory.
@@ -14,11 +15,11 @@ The shape is adapted from [Anthropic's AI-native SDLC playbook](https://claude.c
 
 The operator owns the intent and its acceptance. The builder owns the plan. The spec is shared: the operator may set decisions and preferences, and the builder adds the decisions its investigation turns up. The plan changes freely within those bounds. Changing the intent or an approved decision requires returning to the operator.
 
-| File | Owner | Changes during the build |
-| --- | --- | --- |
-| `intent.md` | operator | the body only through the operator; `status` as the Status section says |
-| `spec.md` | shared | the builder adds decisions; approved decisions and preferences change only through the operator |
-| `plan.md` | builder | freely, whenever the build shows it is wrong |
+| File        | Owner    | Changes during the build                                                                        |
+| ----------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `intent.md` | operator | the body only through the operator; `status` as the Status section says                         |
+| `spec.md`   | shared   | the builder adds decisions; approved decisions and preferences change only through the operator |
+| `plan.md`   | builder  | freely, whenever the build shows it is wrong                                                    |
 
 The builder is whoever is building, usually an agent. Ownership is authority, not authorship. An agent may draft all three files; ownership decides whose approval a change needs.
 
@@ -178,4 +179,5 @@ Findings from operating the system open a new pipeline. Closed pipelines stay cl
 - **Design and Build as separate stages with separate approvals.** Here they are one conversation. The gates are on the intent going in and the verification coming out.
 - **A shared `/intent/` folder holding intents apart from their work.** Splitting one unit of work across two trees makes a reader reassemble it. One directory holds the whole pipeline.
 - **Autonomous maintenance loops that act on detected breaches.** An agent acting on its own detection needs a control band, and setting one takes operating data this process does not assume. Detection can come later; autonomous action is not adopted.
+
 <!-- /devloop:pipelines -->
