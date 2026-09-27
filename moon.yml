@@ -1,0 +1,51 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
+language: rust
+layer: library
+
+# Cargo owns incremental compilation. Always execute checks, and never archive
+# target/ in Moon's task cache.
+taskOptions:
+  cache: false
+
+tasks:
+  format:
+    command: cargo fmt --all
+    deps:
+      - rust:oxfmt
+    options:
+      runInCI: false
+  format-check:
+    command: cargo fmt --all -- --check
+    deps:
+      - rust:oxfmt-check
+  pnpm-install:
+    command: pnpm install --frozen-lockfile
+  oxfmt:
+    command: pnpm exec oxfmt
+    deps:
+      - rust:pnpm-install
+    options:
+      runInCI: false
+  oxfmt-check:
+    command: pnpm exec oxfmt --check
+    deps:
+      - rust:pnpm-install
+  lint:
+    command: cargo clippy --workspace --all-targets --locked -- -D warnings
+  test:
+    command: cargo test --workspace --locked
+  wasm-check:
+    command: cargo check --workspace --lib --locked --target wasm32-unknown-unknown
+  counter:
+    command: cargo run --locked -p netplaycraft-counter
+  verify:
+    deps:
+      - rust:format-check
+      - rust:lint
+      - rust:test
+      - rust:wasm-check
+      - rust:counter
+    options:
+      # Avoid competing Cargo processes taking the same workspace build lock.
+      runDepsInParallel: false

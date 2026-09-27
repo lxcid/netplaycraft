@@ -2,7 +2,41 @@
 
 This file holds instructions for coding agents working in this repository.
 
+## Netplaycraft
+
+Read docs/architecture.md for implemented boundaries and docs/plan.md for product
+intent. Roadmap items are not authorization to expand the current milestone.
+
+- Prefer the smallest design that meets the current need. Do not create placeholder
+  crates, universal configuration objects, or speculative adapter machinery.
+- Weigh edge cases by likelihood, impact, recoverability, and implementation plus
+  maintenance cost. Document tolerated limitations instead of hiding complexity.
+- Keep game rules independent of networking, authority placement, durable storage,
+  browsers, engines, and runtimes. Adapter dependencies point inward.
+- Portable core/netcode must not import WebRTC, WebTransport, Cloudflare, S3, Bevy,
+  browser APIs, or Tokio without a demonstrated need and an explicit decision.
+- Separate player identity, peer identity, simulation ticks, and journal ordering.
+  Never use a diagnostic checksum as authentication or integrity protection.
+- Keep time and fault injection deterministic in tests. No sleeps or ambient RNG.
+- At a library boundary, inspect its source before guessing about behavior. A
+  failed fix indicates an incomplete hypothesis; narrow it before redesigning UX
+  or replacing libraries.
+- Prefer stable safe Rust, small composable traits, and minimal dependencies.
+  Add tracing when runtime integration needs structured events; current diagnostic
+  counters should stay directly testable.
+- Keep this a crates-first monorepo: reusable Rust code in crates/, reference
+  applications in examples/, documentation in docs/. Add other language projects
+  only when needed; register them in .moon/workspace.yml.
+- Proto manages tool versions, Moon orchestrates tasks, Cargo owns the Rust
+  dependency graph, and pnpm owns Node dev tools such as oxfmt. Update Rust/Moon
+  pins in .prototools and run moon sync to synchronize rust-toolchain.toml. The
+  proto bootstrap pin is in .moon/toolchains.yml.
+- Run proto use on setup, moon run rust:format after editing code or docs, and
+  moon run rust:verify for cross-cutting changes. Verify is the same entry point as
+  CI. Update protocol/architecture docs when contracts change.
+
 <!-- devloop:design-judgment v1 sha:0731ae6f -->
+
 ## Design Judgment
 
 **Default to the minimal necessary complexity.** Prefer the smallest design that satisfies the current product need, fits the existing architecture, and leaves a clear path to extend later. Be suspicious of abstractions, invariants, retries, background machinery, or schema constraints that mostly exist to make the design feel complete rather than to solve a present problem.
@@ -30,6 +64,7 @@ Tolerate or defer a case when the four factors together show that the fix costs 
 <!-- /devloop:design-judgment -->
 
 <!-- devloop:debugging-discipline v2 sha:568414f5 -->
+
 ## Debugging Discipline
 
 **A failed fix is evidence your mental model is incomplete, not yet evidence the design is wrong.** Retry smaller and more carefully. The failure mode to watch for is **escalating commitment under uncertainty**: repeated failed guesses can make a rewrite feel justified, when the fix usually exists at a smaller scope you have not located yet.
@@ -38,18 +73,22 @@ Tolerate or defer a case when the four factors together show that the fix costs 
 - **Enumerate every input that could produce the symptom before concluding any one is _the_ cause.** Stopping one doesn't stop the others. For event-driven code this means listing the full family that can fire, not the first one that looks plausible.
 - **Symptom-based theories are hypotheses, not conclusions.** Before editing, name what you think is happening and what would falsify it. If the fix fails, treat the hypothesis as incomplete or unproven — narrow with a log, source-reading, or a smaller repro before editing again.
 - **"Simple" or "minimal" means the smallest sufficient fix with the feature's requirements held constant.** Replacing a broken inline editor with a cruder prompt removes the interaction instead of fixing it. Starting over or switching libraries does not establish that you understood or fixed the cause. Redesign when evidence says the design is wrong, not merely because repeated attempts failed.
+
 <!-- /devloop:debugging-discipline -->
 
 <!-- devloop:test-design v1 sha:18cde2ed -->
+
 ## Test Design
 
 - **TDD for behavior changes.** Smallest meaningful failing test first; tests are part of the design.
 - **Test at the lowest useful level** with the real contract for that surface: state transitions for domain logic, request/response for HTTP handlers, auth boundaries for identity, user-visible state changes for UI. Cover unhappy paths (authorization failures, stale versions, malformed input, expiry, retries, idempotency, boundaries).
 - **Avoid over-stubbing.** A test that passes while real integration fails is worse than no test. When a unit test needs heavy mocking, prefer a narrower pure-helper test, a handler-level test with real local collaborators, or a smoke check.
 - **Skipping tests is an explicit engineering call** — justify it with the reason, what verification you ran instead, and what test to add if the surface grows.
+
 <!-- /devloop:test-design -->
 
 <!-- devloop:writing-style v3 sha:cbf3be9a -->
+
 ## Writing Style
 
 ### Comments
@@ -75,9 +114,11 @@ Write docs, issue bodies, and PR/issue comments for a human reviewer, not for de
 ### Shell output
 
 - Single space between args; never pad to align value columns. Padded whitespace reads as a typo and costs reader doubt.
+
 <!-- /devloop:writing-style -->
 
 <!-- devloop:commit-conventions v2 sha:761ae1a5 -->
+
 ## Commits
 
 Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for **all** commits, including bot-emitted: `<type>(<scope>): <subject>`.
@@ -98,9 +139,11 @@ Scopes are this repository's own top-level units. Use a combined `chore(a,b): �
 - One logical change per commit. Mechanical changes such as a reformat go in their own commit.
 - Never `--amend` unless explicitly asked; create a new commit. Hook failure means the commit didn't happen, so an amend would modify the _previous_ commit and may destroy work.
 - Never `--no-verify` to skip hooks. If a commit or hook fails, inspect and report the failure, then fix its cause before retrying.
+
 <!-- /devloop:commit-conventions -->
 
 <!-- devloop:handoff-contract v1 sha:f0253f90 -->
+
 ## Handoff
 
 Every task ends with a handoff. Reporting what changed is the easy half; the obligations below are the half that gets dropped, and each one exists because the operator cannot recover it from the diff.
@@ -116,6 +159,7 @@ State these even when they are unflattering, and especially when nobody asked. A
 <!-- /devloop:handoff-contract -->
 
 <!-- devloop:pipelines v1 sha:e97a5def -->
+
 ## Pipelines
 
 Work in this repository is organised into pipelines under `docs/pipelines/`. Each one holds a unit of work end to end: `intent.md` states the problem, `spec.md` records the decisions, `plan.md` tracks the build.
@@ -131,4 +175,5 @@ Before implementing anything, read `docs/pipelines/README.md` and the `intent.md
 - Before implementing, list the binding decisions from other pipelines with the command in the README's spec section, and read each listed decision. They constrain your work even though another pipeline made them. Only an approved `Overturns:` decision lifts one; follow a proposed binding as if it were approved.
 - Mark a decision `Binding:` only when you can name the later pipeline that could violate it without noticing.
 - The plan is yours. Revise it whenever the build shows it is wrong, keep `plan.md` current as you build, and mark what was verified by which command separately from what is merely asserted.
+
 <!-- /devloop:pipelines -->
